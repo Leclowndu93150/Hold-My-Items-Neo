@@ -1,0 +1,18 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.leclowndu93150.holdmyitems.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "holdmyitems.refmap.json",
+  "mixins": [
+  ],
+  "client": [
+    "HeldItemsMixin",
+    "HumanoidArmMixin",
+    "LivingEntityMixin",
+    "PlayerRendererMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
