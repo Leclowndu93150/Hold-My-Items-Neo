@@ -1,5 +1,6 @@
 package com.leclowndu93150.holdmyitems.mixin;
 
+import com.google.common.collect.Multimap;
 import com.leclowndu93150.holdmyitems.HoldMyItems;
 import com.leclowndu93150.holdmyitems.config.HoldMyItemsClientConfig;
 import com.leclowndu93150.holdmyitems.tags.HoldMyItemsTags;
@@ -7,6 +8,7 @@ import com.leclowndu93150.holdmyitems.utils.UseAnimMappings;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import net.minecraft.client.Minecraft;
@@ -15,22 +17,23 @@ import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.*;
-import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -76,18 +79,17 @@ public abstract class HeldItemsMixin {
 
     private float getAttackDamage(ItemStack stack) {
         float totalDamage = 0.0F;
-        ItemAttributeModifiers modifiers = (ItemAttributeModifiers)stack.get(DataComponents.ATTRIBUTE_MODIFIERS);
-        if (modifiers == null) {
-            return totalDamage;
-        } else {
-            for(ItemAttributeModifiers.Entry entry : modifiers.modifiers()) {
-                if (entry.attribute().equals(Attributes.ATTACK_DAMAGE)) {
-                    totalDamage += (float)entry.modifier().amount();
-                }
-            }
+        Multimap<Attribute, AttributeModifier> modifiers = stack.getAttributeModifiers(EquipmentSlot.MAINHAND);
 
-            return totalDamage;
+        for(Map.Entry<Attribute, AttributeModifier> entry : modifiers.entries()) {
+            Attribute attribute = (Attribute)entry.getKey();
+            AttributeModifier modifier = (AttributeModifier)entry.getValue();
+            if (attribute.equals(Attributes.ATTACK_DAMAGE)) {
+                totalDamage += (float)modifier.getAmount();
+            }
         }
+
+        return totalDamage;
     }
 
     private void swingArm(float swingProgress, float equipProgress, PoseStack matrices, int armX, HumanoidArm arm) {
@@ -141,7 +143,7 @@ public abstract class HeldItemsMixin {
         if (!isUsingSandpaper) {
             if ((Boolean) HoldMyItemsClientConfig.ENABLE_PUNCHING.get() || !stack.isEmpty() || p.isSwimming() || p.isVisuallyCrawling() || p.onClimbable()) {
                 Item item = stack.getItem();
-                ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(item);
+                ResourceLocation itemId = ForgeRegistries.ITEMS.getKey(item);
                 List<? extends String> blockedModIds = (List)HoldMyItemsClientConfig.MODS_THAT_HANDLE_THEIR_OWN_RENDERING.get();
                 if (itemId != null) {
                     String namespace = itemId.getNamespace().toLowerCase();
@@ -154,7 +156,7 @@ public abstract class HeldItemsMixin {
                 }
 
                 Item mainHandItem = p.getMainHandItem().getItem();
-                ResourceLocation mainHandId = BuiltInRegistries.ITEM.getKey(mainHandItem);
+                ResourceLocation mainHandId = ForgeRegistries.ITEMS.getKey(mainHandItem);
                 if (mainHandId != null) {
                     String namespace = mainHandId.getNamespace().toLowerCase();
 
@@ -360,14 +362,8 @@ public abstract class HeldItemsMixin {
                     poseStack.translate((double)0.0F, 0.02 * (double)this.inWaterCounter, (double)0.0F);
                     poseStack.mulPose(Axis.ZP.rotationDegrees(8.0F * kj * this.inWaterCounter));
                     poseStack.mulPose(Axis.XP.rotationDegrees(0.3F * Mth.sin(this.freezeCounter * 5.0F)));
-                    if (p.getDeltaMovement().y() < -0.85 && stack.is(Items.MACE) && p.getMainHandItem() == stack) {
-                        this.fallCounter = (float)((double)this.fallCounter + 0.1 * tt);
-                        if (this.fallCounter >= 1.0F) {
-                            this.fallCounter = 1.0F;
-                        }
-                    } else {
-                        this.fallCounter = (float)((double)this.fallCounter * Math.pow((double)0.88F, tt));
-                    }
+
+                    this.fallCounter = (float)((double)this.fallCounter * Math.pow((double)0.88F, tt));
 
                     if (bl) {
                         poseStack.mulPose(Axis.XP.rotationDegrees(45.0F * this.fallCounter));
@@ -503,7 +499,7 @@ public abstract class HeldItemsMixin {
                                 this.renderPlayerArm(poseStack, buffer, light, 0.0F, 0.0F, arm);
                             }
                         }
-                    } else if (stack.has(DataComponents.MAP_ID)) {
+                    } else if (stack.getItem() == Items.FILLED_MAP) {
                         if (bl && this.offHandItem.isEmpty()) {
                             poseStack.translate((double)0.0F, 0.1, (double)0.0F);
                             this.renderTwoHandedMap(poseStack, buffer, light, pitch, equipProgress, swingProgress);
@@ -522,8 +518,8 @@ public abstract class HeldItemsMixin {
                             poseStack.mulPose(Axis.XP.rotationDegrees(-11.935F));
                             poseStack.mulPose(Axis.YP.rotationDegrees((float)i * 65.3F));
                             poseStack.mulPose(Axis.ZP.rotationDegrees((float)i * 9.785F));
-                            float f = (float)stack.getUseDuration(p) - ((float)p.getUseItemRemainingTicks() - partialTicks + 1.0F);
-                            float g = f / (float)CrossbowItem.getChargeDuration(stack, p);
+                            float f = (float)stack.getUseDuration() - ((float)p.getUseItemRemainingTicks() - partialTicks + 1.0F);
+                            float g = f / (float)CrossbowItem.getChargeDuration(stack);
                             if (g > 1.0F) {
                                 g = 1.0F;
                             }
@@ -566,8 +562,8 @@ public abstract class HeldItemsMixin {
                         this.renderItem(p, stack, bl3 ? ItemDisplayContext.FIRST_PERSON_RIGHT_HAND : ItemDisplayContext.FIRST_PERSON_LEFT_HAND, !bl3, poseStack, buffer, light);
                         poseStack.popPose();
                         if (p.isUsingItem() && p.getUseItemRemainingTicks() > 0 && p.getUsedItemHand() == hand) {
-                            float f = (float)stack.getUseDuration(p) - ((float)p.getUseItemRemainingTicks() - partialTicks + 1.0F);
-                            float g = f / (float)CrossbowItem.getChargeDuration(stack, p);
+                            float f = (float)stack.getUseDuration() - ((float)p.getUseItemRemainingTicks() - partialTicks + 1.0F);
+                            float g = f / (float)CrossbowItem.getChargeDuration(stack);
                             if (g > 1.0F) {
                                 g = 1.0F;
                             }
@@ -596,7 +592,7 @@ public abstract class HeldItemsMixin {
                                         break;
                                     case 2:
                                     case 3:
-                                        float yawDelta = (float)stack.getUseDuration(p) - ((float)p.getUseItemRemainingTicks() - partialTicks + 1.0F);
+                                        float yawDelta = (float)stack.getUseDuration() - ((float)p.getUseItemRemainingTicks() - partialTicks + 1.0F);
                                         float pitchDelta = yawDelta / 5.0F;
                                         if (pitchDelta > 1.0F) {
                                             pitchDelta = 1.0F;
@@ -618,7 +614,7 @@ public abstract class HeldItemsMixin {
                                         break;
                                     case 4:
                                         //FIX ??
-                                        k = (float)stack.getUseDuration(p) - ((float)p.getUseItemRemainingTicks() - partialTicks + 1.0F);
+                                        k = (float)stack.getUseDuration() - ((float)p.getUseItemRemainingTicks() - partialTicks + 1.0F);
                                         double s = (double)(k / 4.0F);
                                         float s2 = k / 6.0F;
                                         if (s > (double)1.0F) {
@@ -657,7 +653,7 @@ public abstract class HeldItemsMixin {
                                             bl = !bl;
                                         }
 
-                                        float m1 = (float)stack.getUseDuration(p) - ((float)p.getUseItemRemainingTicks() - partialTicks + 1.0F);
+                                        float m1 = (float)stack.getUseDuration() - ((float)p.getUseItemRemainingTicks() - partialTicks + 1.0F);
                                         float f1 = m1 / 20.0F;
                                         float f = (f1 * f1 + f1 * 2.0F) / 3.0F;
                                         if (f1 > 1.0F) {
@@ -721,7 +717,7 @@ public abstract class HeldItemsMixin {
                                             poseStack.popPose();
                                         }
 
-                                        float dt = (float)stack.getUseDuration(p) - ((float)p.getUseItemRemainingTicks() - partialTicks + 1.0F);
+                                        float dt = (float)stack.getUseDuration() - ((float)p.getUseItemRemainingTicks() - partialTicks + 1.0F);
                                         //FIX ??
                                         f = dt / 10.0F;
                                         if (f > 1.0F) {
@@ -748,7 +744,7 @@ public abstract class HeldItemsMixin {
                                         float h1 = g1 - partialTicks + 1.0F;
                                         float j1 = 1.0F - h1 / 10.0F;
                                         float n = -15.0F + 75.0F * Mth.cos(j1 * 2.0F * (float)Math.PI);
-                                        float z = (float)stack.getUseDuration(p) - ((float)p.getUseItemRemainingTicks() - partialTicks + 1.0F);
+                                        float z = (float)stack.getUseDuration() - ((float)p.getUseItemRemainingTicks() - partialTicks + 1.0F);
                                         float x = z / 4.0F;
                                         if (x > 1.0F) {
                                             x = 1.0F;
@@ -764,7 +760,7 @@ public abstract class HeldItemsMixin {
                                 }
                             } else if (p.isAutoSpinAttack() && stack.getUseAnimation() == UseAnim.SPEAR) {
                                 this.riptideCounter = (float)((double)this.riptideCounter + 0.15 * tt);
-                                float dt = (float)stack.getUseDuration(p) - ((float)p.getUseItemRemainingTicks() - partialTicks + 1.0F);
+                                float dt = (float)stack.getUseDuration() - ((float)p.getUseItemRemainingTicks() - partialTicks + 1.0F);
                                 float f = dt / 10.0F;
                                 if (f > 1.0F) {
                                     f = 1.0F;

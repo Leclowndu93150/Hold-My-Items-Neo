@@ -1,21 +1,22 @@
 package com.leclowndu93150.holdmyitems.config;
 
-import net.neoforged.neoforge.common.ModConfigSpec;
+
+import net.minecraftforge.common.ForgeConfigSpec;
 
 import java.util.List;
 
 public class HoldMyItemsClientConfig {
-    public static final ModConfigSpec CLIENT_CONFIG;
-    public static final ModConfigSpec.DoubleValue ANIMATION_SPEED;
-    public static final ModConfigSpec.BooleanValue ENABLE_SWIMMING_ANIM;
-    public static final ModConfigSpec.IntValue SWING_SPEED;
-    public static final ModConfigSpec.BooleanValue ENABLE_CLIMB_AND_CRAWL;
-    public static final ModConfigSpec.BooleanValue ENABLE_PUNCHING;
-    public static final ModConfigSpec.DoubleValue VIEWMODEL_X_OFFSET;
-    public static final ModConfigSpec.DoubleValue VIEWMODEL_Y_OFFSET;
-    public static final ModConfigSpec.DoubleValue VIEWMODEL_Z_OFFSET;
-    public static final ModConfigSpec.BooleanValue MB3D_COMPAT;
-    public static final ModConfigSpec.ConfigValue<List<? extends String>> MODS_THAT_HANDLE_THEIR_OWN_RENDERING;
+    public static final ForgeConfigSpec CLIENT_CONFIG;
+    public static final ForgeConfigSpec.DoubleValue ANIMATION_SPEED;
+    public static final ForgeConfigSpec.BooleanValue ENABLE_SWIMMING_ANIM;
+    public static final ForgeConfigSpec.IntValue SWING_SPEED;
+    public static final ForgeConfigSpec.BooleanValue ENABLE_CLIMB_AND_CRAWL;
+    public static final ForgeConfigSpec.BooleanValue ENABLE_PUNCHING;
+    public static final ForgeConfigSpec.DoubleValue VIEWMODEL_X_OFFSET;
+    public static final ForgeConfigSpec.DoubleValue VIEWMODEL_Y_OFFSET;
+    public static final ForgeConfigSpec.DoubleValue VIEWMODEL_Z_OFFSET;
+    public static final ForgeConfigSpec.BooleanValue MB3D_COMPAT;
+    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> MODS_THAT_HANDLE_THEIR_OWN_RENDERING;
 
     public HoldMyItemsClientConfig() {
     }
@@ -33,7 +34,7 @@ public class HoldMyItemsClientConfig {
     }
 
     static {
-        ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
+        ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
         builder.push("animations");
         ANIMATION_SPEED = builder.comment("Choose your preferred animation speed (1-15)").defineInRange("animationSpeed", (double)8.0F, (double)1.0F, (double)15.0F);
         ENABLE_SWIMMING_ANIM = builder.comment("Enable or disable swimming animation").define("enableSwimmingAnimation", true);

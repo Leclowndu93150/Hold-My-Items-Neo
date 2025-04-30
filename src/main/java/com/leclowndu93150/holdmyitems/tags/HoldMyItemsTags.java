@@ -18,10 +18,10 @@ public class HoldMyItemsTags {
     }
 
     static {
-        LANTERNS = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", "lanterns"));
-        BUCKETS = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", "buckets"));
-        GLASS_PANES = BlockTags.create(ResourceLocation.fromNamespaceAndPath("c", "glass_panes"));
-        TOOLS = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", "tools"));
+        LANTERNS = TagKey.create(Registries.ITEM, new ResourceLocation("forge", "lanterns"));
+        BUCKETS = TagKey.create(Registries.ITEM,  new ResourceLocation("forge", "buckets"));
+        GLASS_PANES = BlockTags.create( new ResourceLocation("forge", "glass_panes"));
+        TOOLS = TagKey.create(Registries.ITEM,  new ResourceLocation("forge", "tools"));
     }
 
 }
