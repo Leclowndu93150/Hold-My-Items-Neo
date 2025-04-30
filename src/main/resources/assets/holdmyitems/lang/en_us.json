@@ -1,5 +1,16 @@
 {
-  "itemGroup.holdmyitems": "Example Mod Tab",
-  "block.holdmyitems.example_block": "Example Block",
-  "item.holdmyitems.example_item": "Example Item"
+  "holdmyitems.configuration.animations": "Animations",
+  "holdmyitems.configuration.positions": "Positions",
+  "holdmyitems.configuration.misc": "Miscellaneous",
+  "holdmyitems.configuration.modRenderExclusions": "Mod Render Exclusions",
+  "holdmyitems.configuration.animationSpeed": "Animation Speed",
+  "holdmyitems.configuration.enableSwimmingAnimation": "Swimming Animation",
+  "holdmyitems.configuration.swingSpeed": "Swing Speed",
+  "holdmyitems.configuration.enableClimbAndCrawlAnimation": "Climb & Crawl Animation",
+  "holdmyitems.configuration.enablePunchingAnimation": "Punching Animation",
+  "holdmyitems.configuration.viewmodelXOffset": "Viewmodel X Offset",
+  "holdmyitems.configuration.viewmodelYOffset": "Viewmodel Y Offset",
+  "holdmyitems.configuration.viewmodelZOffset": "Viewmodel Z Offset",
+  "holdmyitems.configuration.mb3DCompat": "MB3D Compatibility",
+  "holdmyitems.configuration.modsThatHandleTheirOwnRendering": "Custom Rendering Mods"
 }
