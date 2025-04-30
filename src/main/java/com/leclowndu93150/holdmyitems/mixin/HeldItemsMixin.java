@@ -404,7 +404,7 @@ public abstract class HeldItemsMixin {
                     }
 
                     if (p.isSwimming() && swingProgress == 0.0F && (Boolean)HoldMyItemsClientConfig.ENABLE_SWIMMING_ANIM.get()) {
-                        double s = (double)this.crawlCount;
+                        double s = (double)(p.tickCount + partialTicks) * 0.1;
                         double swingAmplitude = (double)1.5F;
                         double frequency = (double)2.0F;
                         s *= frequency;
@@ -412,7 +412,7 @@ public abstract class HeldItemsMixin {
                         double smoothRotation = handRotation * 0.8 + this.previousRotation * 0.2;
                         poseStack.mulPose(Axis.YP.rotationDegrees((float)(bl ? smoothRotation : -smoothRotation)));
                         poseStack.translate((double)0.0F, (double)0.0F, smoothRotation * (double)0.2F);
-                        double k = (double)(this.crawlCount * 2.0F);
+                        double k = (double)(p.tickCount + partialTicks) * 0.2;
                         double a = Math.cos(k);
                         double b = a;
                         if (a <= (double)0.0F) {
@@ -437,7 +437,7 @@ public abstract class HeldItemsMixin {
                     }
 
                     if ((p.onClimbable() && !p.onGround() || p.isVisuallyCrawling() && swingProgress == 0.0F) && !p.isUsingItem()) {
-                        double s = (double)this.climbCount;
+                        double s = (double)(p.tickCount + partialTicks) * 0.1;
                         float h = Mth.cos((float)s * 2.0F);
                         float j = bl ? 1.0F : -1.0F;
                         if (p.onClimbable()) {
@@ -449,8 +449,9 @@ public abstract class HeldItemsMixin {
                         }
 
                         if (p.isVisuallyCrawling() && !p.isUsingItem() && swingProgress == 0.0F) {
-                            float l = Mth.sin(this.directionalCrawlCount * 4.0F * this.mouseHolding);
-                            float dt = Mth.cos(this.directionalCrawlCount * 4.0F * this.mouseHolding);
+                            float timeValue = (float)(p.tickCount + partialTicks) * 0.4F;
+                            float l = Mth.sin(timeValue * this.mouseHolding);
+                            float dt = Mth.cos(timeValue * this.mouseHolding);
                             if (stack.is(Items.LANTERN) || stack.is(Items.SOUL_LANTERN)) {
                                 l *= 0.14F;
                                 dt *= 0.14F;
