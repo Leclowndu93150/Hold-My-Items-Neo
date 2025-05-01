@@ -143,6 +143,11 @@ public abstract class HeldItemsMixin {
         if (!isUsingSandpaper) {
             if ((Boolean) HoldMyItemsClientConfig.ENABLE_PUNCHING.get() || !stack.isEmpty() || p.isSwimming() || p.isVisuallyCrawling() || p.onClimbable()) {
                 Item item = stack.getItem();
+
+                if (HoldMyItemsClientConfig.isItemDisabled(item)) {
+                    return;
+                }
+
                 ResourceLocation itemId = ForgeRegistries.ITEMS.getKey(item);
                 List<? extends String> blockedModIds = (List)HoldMyItemsClientConfig.MODS_THAT_HANDLE_THEIR_OWN_RENDERING.get();
                 if (itemId != null) {

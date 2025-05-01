@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 @Mod(HoldMyItems.MODID)
 public class HoldMyItems {
     public static final String MODID = "holdmyitems";
-    private static final Logger LOGGER = LogUtils.getLogger();
+    public static final Logger LOGGER = LogUtils.getLogger();
 
     private static double prevTime = (double)0.0F;
     public static double deltaTime = (double)0.0F;
