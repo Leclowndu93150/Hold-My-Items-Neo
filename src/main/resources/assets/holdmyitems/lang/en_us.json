@@ -3,6 +3,7 @@
   "holdmyitems.configuration.positions": "Positions",
   "holdmyitems.configuration.misc": "Miscellaneous",
   "holdmyitems.configuration.modRenderExclusions": "Mod Render Exclusions",
+  "holdmyitems.configuration.itemRenderExclusions": "Item Render Exclusions",
   "holdmyitems.configuration.animationSpeed": "Animation Speed",
   "holdmyitems.configuration.enableSwimmingAnimation": "Swimming Animation",
   "holdmyitems.configuration.swingSpeed": "Swing Speed",
@@ -12,5 +13,6 @@
   "holdmyitems.configuration.viewmodelYOffset": "Viewmodel Y Offset",
   "holdmyitems.configuration.viewmodelZOffset": "Viewmodel Z Offset",
   "holdmyitems.configuration.mb3DCompat": "MB3D Compatibility",
-  "holdmyitems.configuration.modsThatHandleTheirOwnRendering": "Custom Rendering Mods"
+  "holdmyitems.configuration.modsThatHandleTheirOwnRendering": "Custom Rendering Mods",
+  "holdmyitems.configuration.disabledItems": "Item Render Exclusion"
 }
