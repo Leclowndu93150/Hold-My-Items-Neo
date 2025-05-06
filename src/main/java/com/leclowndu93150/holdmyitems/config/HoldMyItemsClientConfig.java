@@ -1,6 +1,7 @@
 package com.leclowndu93150.holdmyitems.config;
 
 import com.leclowndu93150.holdmyitems.HoldMyItems;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -46,9 +47,9 @@ public class HoldMyItemsClientConfig {
             } else {
                 ResourceLocation itemId = ResourceLocation.tryParse(itemName);
                 if (itemId != null) {
-                    Item item = BuiltInRegistries.ITEM.get(itemId);
+                    Optional<Holder.Reference<Item>> item = BuiltInRegistries.ITEM.get(itemId);
                     if (item != null) {
-                        disabledItemCache.add(item);
+                        disabledItemCache.add(item.get().value());
                     } else {
                         try {
                             disabledItemPatterns.add(Pattern.compile(Pattern.quote(itemName)));

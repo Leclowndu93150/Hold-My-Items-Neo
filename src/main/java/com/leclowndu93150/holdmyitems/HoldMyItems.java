@@ -8,8 +8,10 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
+import net.neoforged.neoforge.client.event.RenderFrameEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
+import net.neoforged.neoforge.common.NeoForge;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 
@@ -36,7 +38,11 @@ public class HoldMyItems {
     public HoldMyItems(IEventBus modEventBus, ModContainer modContainer) {
         modContainer.registerConfig(ModConfig.Type.CLIENT, HoldMyItemsClientConfig.CLIENT_CONFIG);
         modContainer.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
-        RenderSystem.recordRenderCall(this::updateDeltatime);
+        NeoForge.EVENT_BUS.addListener(this::onRenderTick);
+    }
+
+    private void onRenderTick(RenderFrameEvent.Pre event) {
+        this.updateDeltatime();
     }
 
 }

@@ -119,7 +119,7 @@ public abstract class HeldItemsMixin {
     }
 
     @Shadow
-    public abstract void renderItem(LivingEntity var1, ItemStack var2, ItemDisplayContext var3, boolean var4, PoseStack var5, MultiBufferSource var6, int var7);
+    public abstract void renderItem(LivingEntity entity, ItemStack stack, ItemDisplayContext displayContext, PoseStack poseStack, MultiBufferSource buffer, int packedLight);
 
     @Shadow
     protected abstract void renderTwoHandedMap(PoseStack var1, MultiBufferSource var2, int var3, float var4, float var5, float var6);
@@ -203,7 +203,7 @@ public abstract class HeldItemsMixin {
                     float swing_rot = (double)swingProgress < 0.6 ? Mth.sin(Mth.clamp(swingProgress, 0.0F, 0.12506F) * 12.56F) : Mth.sin(Mth.clamp(swingProgress, 0.62532F, 0.75038F) * 12.56F);
                     float swing = Mth.sin(swingProgress * 3.14F);
                     swing = this.easeInOutBack(swing);
-                    if ((stack.is(Items.EXPERIENCE_BOTTLE) || stack.is(Items.EGG) || stack.is(Items.ENDER_EYE) || stack.is(Items.SNOWBALL) || stack.is(Items.ENDER_PEARL) || stack.getItem() instanceof SplashPotionItem || stack.getItem() instanceof LingeringPotionItem) && p.getOffhandItem().isEmpty() && stack.getUseAnimation() != UseAnim.SPEAR && !stack.is(Items.FIRE_CHARGE) && !p.isSwimming() && !p.isVisuallyCrawling() && !p.onClimbable()) {
+                    if ((stack.is(Items.EXPERIENCE_BOTTLE) || stack.is(Items.EGG) || stack.is(Items.ENDER_EYE) || stack.is(Items.SNOWBALL) || stack.is(Items.ENDER_PEARL) || stack.getItem() instanceof SplashPotionItem || stack.getItem() instanceof LingeringPotionItem) && p.getOffhandItem().isEmpty() && stack.getUseAnimation() != ItemUseAnimation.SPEAR && !stack.is(Items.FIRE_CHARGE) && !p.isSwimming() && !p.isVisuallyCrawling() && !p.onClimbable()) {
                         if (p.getMainArm() == HumanoidArm.LEFT) {
                             bl = !bl;
                         }
@@ -230,20 +230,20 @@ public abstract class HeldItemsMixin {
                         }
 
                         float ll = bl ? 1.0F : -1.0F;
-                        if ((this.left || stack.is(ItemTags.AXES) || stack.getUseAnimation() == UseAnim.SPEAR || stack.getUseAnimation() == UseAnim.BLOCK) && !stack.is(ItemTags.SHOVELS)) {
+                        if ((this.left || stack.is(ItemTags.AXES) || stack.getUseAnimation() == ItemUseAnimation.SPEAR || stack.getUseAnimation() == ItemUseAnimation.BLOCK) && !stack.is(ItemTags.SHOVELS)) {
                             if (!stack.is(ItemTags.SWORDS) && !stack.is(ItemTags.AXES)) {
-                                if (stack.getUseAnimation() == UseAnim.SPEAR) {
+                                if (stack.getUseAnimation() == ItemUseAnimation.SPEAR) {
                                     poseStack.translate((double)0.0F, (double)0.0F, 0.45 * (double)swing_rot);
                                     poseStack.translate((double)-0.25F * (double)kj * (double)swing, -0.35 * (double)swing_rot, -0.6 * (double)swing);
                                     poseStack.translate((double)0.0F, 0.1 * (double)swing, (double)0.0F);
                                     poseStack.mulPose(Axis.YP.rotationDegrees(15.0F * swing_rot * ll));
                                     poseStack.mulPose(Axis.ZP.rotationDegrees(30.0F * swing_rot * ll));
-                                } else if (stack.is(HoldMyItemsTags.TOOLS) && stack.getUseAnimation() != UseAnim.BLOCK && !stack.is(ItemTags.SHOVELS)) {
+                                } else if (stack.is(HoldMyItemsTags.TOOLS) && stack.getUseAnimation() != ItemUseAnimation.BLOCK && !stack.is(ItemTags.SHOVELS)) {
                                     poseStack.translate(0.1 * (double)ll * (double)swing_rot, 0.1 * (double)swing_rot, (double)-0.5F * (double)swing);
                                     poseStack.mulPose(Axis.XN.rotationDegrees(-30.0F * swing_rot));
                                     poseStack.mulPose(Axis.ZP.rotationDegrees(-20.0F * swing_rot * ll));
                                     poseStack.mulPose(Axis.XN.rotationDegrees(40.0F * swing));
-                                } else if (stack.getUseAnimation() != UseAnim.BLOCK) {
+                                } else if (stack.getUseAnimation() != ItemUseAnimation.BLOCK) {
                                     poseStack.translate(0.1 * (double)ll * (double)swing_rot, 0.1 * (double)swing_rot, -0.1 * (double)swing);
                                     poseStack.mulPose(Axis.XN.rotationDegrees(-30.0F * swing_rot));
                                     poseStack.mulPose(Axis.ZP.rotationDegrees(-10.0F * swing_rot * ll));
@@ -292,7 +292,7 @@ public abstract class HeldItemsMixin {
                             poseStack.mulPose(Axis.XP.rotationDegrees(-35.0F * swing_rot));
                             poseStack.mulPose(Axis.XP.rotationDegrees(30.0F * swing));
                         }
-                    } else if (Block.byItem(stack.getItem()) != Blocks.AIR && (!stack.is(HoldMyItemsTags.TOOLS) || stack.is(ItemTags.TRIMMABLE_ARMOR) || stack.is(ItemTags.BOOKSHELF_BOOKS) || stack.getUseAnimation() == UseAnim.EAT || !stack.isEnchantable()) && stack.getUseAnimation() != UseAnim.BOW && stack.getUseAnimation() != UseAnim.SPYGLASS && this.getAttackDamage(stack) == 0.0F && stack.getUseAnimation() != UseAnim.BLOCK && !stack.is(Items.WARPED_FUNGUS_ON_A_STICK) && !stack.is(Items.CARROT_ON_A_STICK) && !(stack.getItem() instanceof FishingRodItem) && !stack.is(Items.SHEARS)) {
+                    } else if (Block.byItem(stack.getItem()) != Blocks.AIR && (!stack.is(HoldMyItemsTags.TOOLS) || stack.is(ItemTags.TRIMMABLE_ARMOR) || stack.is(ItemTags.BOOKSHELF_BOOKS) || stack.getUseAnimation() == ItemUseAnimation.EAT || !stack.isEnchantable()) && stack.getUseAnimation() != ItemUseAnimation.BOW && stack.getUseAnimation() != ItemUseAnimation.SPYGLASS && this.getAttackDamage(stack) == 0.0F && stack.getUseAnimation() != ItemUseAnimation.BLOCK && !stack.is(Items.WARPED_FUNGUS_ON_A_STICK) && !stack.is(Items.CARROT_ON_A_STICK) && !(stack.getItem() instanceof FishingRodItem) && !stack.is(Items.SHEARS)) {
                         swingProgress = (float)((double)swingProgress * 1.2);
                         if (swingProgress > 1.0F) {
                             swingProgress = 0.0F;
@@ -394,7 +394,7 @@ public abstract class HeldItemsMixin {
                             bl = !bl;
                         }
 
-                        if (stack.getUseAnimation() == UseAnim.BLOCK) {
+                        if (stack.getUseAnimation() == ItemUseAnimation.BLOCK) {
                             poseStack.translate(0.0F, 0.0F, 0.0F);
                         } else {
                             poseStack.translate((double)0.0F, -0.1, 0.1);
@@ -516,7 +516,7 @@ public abstract class HeldItemsMixin {
                             poseStack.translate(bl ? -0.1 : 0.1, 0.1, (double)0.0F);
                             this.renderOneHandedMap(poseStack, buffer, light, equipProgress, arm, swingProgress, stack);
                         }
-                    } else if (stack.getUseAnimation() == UseAnim.CROSSBOW) {
+                    } else if (stack.getUseAnimation() == ItemUseAnimation.CROSSBOW) {
                         poseStack.pushPose();
                         boolean bl2 = CrossbowItem.isCharged(stack);
                         boolean bl3 = arm == HumanoidArm.RIGHT;
@@ -568,7 +568,7 @@ public abstract class HeldItemsMixin {
                         poseStack.scale(1.2F, 1.2F, 1.2F);
                         poseStack.mulPose(Axis.XP.rotationDegrees(-10.0F));
                         poseStack.translate((double)0.0F, -0.15, 0.15);
-                        this.renderItem(p, stack, bl3 ? ItemDisplayContext.FIRST_PERSON_RIGHT_HAND : ItemDisplayContext.FIRST_PERSON_LEFT_HAND, !bl3, poseStack, buffer, light);
+                        this.renderItem(p, stack, bl3 ? ItemDisplayContext.FIRST_PERSON_RIGHT_HAND : ItemDisplayContext.FIRST_PERSON_LEFT_HAND, poseStack, buffer, light);
                         poseStack.popPose();
                         if (p.isUsingItem() && p.getUseItemRemainingTicks() > 0 && p.getUsedItemHand() == hand) {
                             float f = (float)stack.getUseDuration(p) - ((float)p.getUseItemRemainingTicks() - partialTicks + 1.0F);
@@ -767,7 +767,7 @@ public abstract class HeldItemsMixin {
 
                                         this.renderPlayerArm(poseStack, buffer, light, equipProgress, swingProgress, arm);
                                 }
-                            } else if (p.isAutoSpinAttack() && stack.getUseAnimation() == UseAnim.SPEAR) {
+                            } else if (p.isAutoSpinAttack() && stack.getUseAnimation() == ItemUseAnimation.SPEAR) {
                                 this.riptideCounter = (float)((double)this.riptideCounter + 0.15 * tt);
                                 float dt = (float)stack.getUseDuration(p) - ((float)p.getUseItemRemainingTicks() - partialTicks + 1.0F);
                                 float f = dt / 10.0F;
@@ -793,7 +793,7 @@ public abstract class HeldItemsMixin {
                             } else {
                                 this.riptideCounter = 0.0F;
                                 if (!stack.is(Items.LANTERN) && !stack.is(Items.SOUL_LANTERN) && !stack.is(ItemTags.HANGING_SIGNS)) {
-                                    if (stack.getUseAnimation() == UseAnim.BLOCK) {
+                                    if (stack.getUseAnimation() == ItemUseAnimation.BLOCK) {
                                         poseStack.translate((double)0.0F, -0.2, (double)0.0F);
                                     }
                                 } else {
@@ -817,7 +817,7 @@ public abstract class HeldItemsMixin {
                                 poseStack.translate(0.2 * (double)l, -0.1, (double)0.0F);
                             }
 
-                            if (Block.byItem(stack.getItem()) != Blocks.AIR && stack.getUseAnimation() != UseAnim.EAT && !stack.is(HoldMyItemsTags.BUCKETS)) {
+                            if (Block.byItem(stack.getItem()) != Blocks.AIR && stack.getUseAnimation() != ItemUseAnimation.EAT && !stack.is(HoldMyItemsTags.BUCKETS)) {
                                 if (stack.getDisplayName().toString().toLowerCase().contains("TORCH".toLowerCase())) {
                                     poseStack.scale(1.5F, 1.5F, 1.5F);
                                     poseStack.mulPose(Axis.YN.rotationDegrees((float)(25 * l)));
@@ -873,8 +873,8 @@ public abstract class HeldItemsMixin {
                                     poseStack.scale(1.5F, 1.5F, 1.5F);
                                 }
                             } else {
-                                if ((!stack.is(HoldMyItemsTags.TOOLS) || stack.is(ItemTags.TRIMMABLE_ARMOR) || stack.is(ItemTags.BOOKSHELF_BOOKS) || stack.getUseAnimation() == UseAnim.EAT || !stack.isEnchantable()) && stack.getUseAnimation() != UseAnim.BOW && stack.getUseAnimation() != UseAnim.SPYGLASS && this.getAttackDamage(stack) == 0.0F && stack.getUseAnimation() != UseAnim.BLOCK && !stack.is(Items.WARPED_FUNGUS_ON_A_STICK) && !stack.is(Items.CARROT_ON_A_STICK) && !(stack.getItem() instanceof FishingRodItem) && !stack.is(Items.SHEARS) && !stack.is(ItemTags.HOES) && !(Boolean)HoldMyItemsClientConfig.MB3D_COMPAT.get()) {
-                                    if (stack.getUseAnimation() == UseAnim.BRUSH) {
+                                if ((!stack.is(HoldMyItemsTags.TOOLS) || stack.is(ItemTags.TRIMMABLE_ARMOR) || stack.is(ItemTags.BOOKSHELF_BOOKS) || stack.getUseAnimation() == ItemUseAnimation.EAT || !stack.isEnchantable()) && stack.getUseAnimation() != ItemUseAnimation.BOW && stack.getUseAnimation() != ItemUseAnimation.SPYGLASS && this.getAttackDamage(stack) == 0.0F && stack.getUseAnimation() != ItemUseAnimation.BLOCK && !stack.is(Items.WARPED_FUNGUS_ON_A_STICK) && !stack.is(Items.CARROT_ON_A_STICK) && !(stack.getItem() instanceof FishingRodItem) && !stack.is(Items.SHEARS) && !stack.is(ItemTags.HOES) && !(Boolean)HoldMyItemsClientConfig.MB3D_COMPAT.get()) {
+                                    if (stack.getUseAnimation() == ItemUseAnimation.BRUSH) {
                                         poseStack.mulPose(Axis.XN.rotationDegrees(25.0F));
                                         poseStack.translate(bl ? (double)0.0F : 0.35, bl ? (double)0.0F : (double)0.25F, bl ? (double)0.0F : 0.37);
                                         if (!bl) {
@@ -900,7 +900,7 @@ public abstract class HeldItemsMixin {
 
                                         poseStack.scale(1.0F, 1.0F + this.vertAngleYSlime * -2.0F, 1.0F);
                                     }
-                                } else if (stack.getUseAnimation() == UseAnim.BLOCK && stack.getUseAnimation() != UseAnim.SPEAR) {
+                                } else if (stack.getUseAnimation() == ItemUseAnimation.BLOCK && stack.getUseAnimation() != ItemUseAnimation.SPEAR) {
                                     poseStack.mulPose(Axis.ZP.rotationDegrees((float)(160 * l)));
                                     poseStack.mulPose(Axis.YP.rotationDegrees((float)(-60 * l)));
                                     poseStack.mulPose(Axis.XP.rotationDegrees(-70.0F));
@@ -908,22 +908,22 @@ public abstract class HeldItemsMixin {
                                     poseStack.translate(0.15 * (double)l, bl ? 0.35 : 0.45, bl ? -0.15 : -0.1);
                                     poseStack.translate(0.17 * (double)l, (double)0.0F, 0.3);
                                     poseStack.mulPose(Axis.YP.rotationDegrees((float)(-90 * l)));
-                                } else if (stack.getUseAnimation() == UseAnim.SPEAR) {
+                                } else if (stack.getUseAnimation() == ItemUseAnimation.SPEAR) {
                                     poseStack.mulPose(Axis.YN.rotationDegrees((float)(75 * l)));
                                     poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
                                     poseStack.mulPose(Axis.ZP.rotationDegrees((float)(45 * l)));
                                     poseStack.translate(-0.3F * (float)l, 0.0F, 0.0F);
-                                } else if (stack.getUseAnimation() != UseAnim.SPEAR) {
+                                } else if (stack.getUseAnimation() != ItemUseAnimation.SPEAR) {
                                     poseStack.mulPose(Axis.YN.rotationDegrees((float)(75 * l)));
                                     poseStack.mulPose(Axis.XP.rotationDegrees(70.0F));
                                     poseStack.mulPose(Axis.ZP.rotationDegrees((float)(45 * l)));
                                 }
 
-                                if (stack.getUseAnimation() != UseAnim.BLOCK) {
+                                if (stack.getUseAnimation() != ItemUseAnimation.BLOCK) {
                                     poseStack.scale(1.2F, 1.2F, 1.2F);
                                 }
 
-                                if (stack.getUseAnimation() == UseAnim.BOW && !p.isUsingItem()) {
+                                if (stack.getUseAnimation() == ItemUseAnimation.BOW && !p.isUsingItem()) {
                                     poseStack.translate(-0.1 * (double)l, -0.2, (double)0.0F);
                                 }
                             }
@@ -931,7 +931,7 @@ public abstract class HeldItemsMixin {
                             Item var118 = stack.getItem();
                             if (var118 instanceof BlockItem) {
                                 BlockItem blockItem = (BlockItem)var118;
-                                if ((!stack.is(HoldMyItemsTags.BUCKETS) && stack.getUseAnimation() != UseAnim.EAT && !stack.is(ItemTags.BANNERS) && !stack.is(Items.STRING) && !stack.is(Items.REDSTONE) && !stack.is(Items.LEVER) && !stack.is(Items.TRIPWIRE_HOOK) && !Block.byItem(stack.getItem()).defaultBlockState().is(HoldMyItemsTags.GLASS_PANES) && !Block.byItem(stack.getItem()).defaultBlockState().is(BlockTags.RAILS) && !Block.byItem(stack.getItem()).defaultBlockState().is(BlockTags.CLIMBABLE) && !stack.is(ItemTags.DOORS) || Block.byItem(stack.getItem()).defaultBlockState().is(BlockTags.LEAVES)) && !Block.byItem(stack.getItem()).defaultBlockState().is(BlockTags.COMBINATION_STEP_SOUND_BLOCKS)) {
+                                if ((!stack.is(HoldMyItemsTags.BUCKETS) && stack.getUseAnimation() != ItemUseAnimation.EAT && !stack.is(ItemTags.BANNERS) && !stack.is(Items.STRING) && !stack.is(Items.REDSTONE) && !stack.is(Items.LEVER) && !stack.is(Items.TRIPWIRE_HOOK) && !Block.byItem(stack.getItem()).defaultBlockState().is(HoldMyItemsTags.GLASS_PANES) && !Block.byItem(stack.getItem()).defaultBlockState().is(BlockTags.RAILS) && !Block.byItem(stack.getItem()).defaultBlockState().is(BlockTags.CLIMBABLE) && !stack.is(ItemTags.DOORS) || Block.byItem(stack.getItem()).defaultBlockState().is(BlockTags.LEAVES)) && !Block.byItem(stack.getItem()).defaultBlockState().is(BlockTags.COMBINATION_STEP_SOUND_BLOCKS)) {
                                     BlockRenderDispatcher blockRenderManager = Minecraft.getInstance().getBlockRenderer();
                                     blockRenderManager.getBlockModel(blockItem.getBlock().defaultBlockState());
                                     poseStack.pushPose();
@@ -994,7 +994,7 @@ public abstract class HeldItemsMixin {
                                 }
                             }
 
-                            if (stack.is(HoldMyItemsTags.TOOLS) && !stack.is(ItemTags.TRIMMABLE_ARMOR) && !stack.is(ItemTags.BOOKSHELF_BOOKS) && stack.getUseAnimation() != UseAnim.EAT && stack.isEnchantable() || stack.getUseAnimation() == UseAnim.BOW || stack.getUseAnimation() == UseAnim.SPYGLASS || this.getAttackDamage(stack) != 0.0F || stack.getUseAnimation() == UseAnim.BLOCK || stack.is(Items.WARPED_FUNGUS_ON_A_STICK) || stack.is(Items.CARROT_ON_A_STICK) || stack.getItem() instanceof FishingRodItem || stack.is(Items.SHEARS)) {
+                            if (stack.is(HoldMyItemsTags.TOOLS) && !stack.is(ItemTags.TRIMMABLE_ARMOR) && !stack.is(ItemTags.BOOKSHELF_BOOKS) && stack.getUseAnimation() != ItemUseAnimation.EAT && stack.isEnchantable() || stack.getUseAnimation() == ItemUseAnimation.BOW || stack.getUseAnimation() == ItemUseAnimation.SPYGLASS || this.getAttackDamage(stack) != 0.0F || stack.getUseAnimation() == ItemUseAnimation.BLOCK || stack.is(Items.WARPED_FUNGUS_ON_A_STICK) || stack.is(Items.CARROT_ON_A_STICK) || stack.getItem() instanceof FishingRodItem || stack.is(Items.SHEARS)) {
                                 if (stack.is(ItemTags.SWORDS)) {
                                     poseStack.mulPose(Axis.XP.rotationDegrees(-60.0F * swing));
                                     poseStack.translate((double)0.0F, 0.1 * (double)swing, -0.1 * (double)swing);
@@ -1003,10 +1003,10 @@ public abstract class HeldItemsMixin {
                                 if (stack.is(ItemTags.SHOVELS)) {
                                     poseStack.mulPose(Axis.XP.rotationDegrees(-80.0F * swing_rot));
                                     poseStack.mulPose(Axis.XP.rotationDegrees(30.0F * swing));
-                                } else if (stack.getUseAnimation() == UseAnim.SPEAR) {
+                                } else if (stack.getUseAnimation() == ItemUseAnimation.SPEAR) {
                                     poseStack.mulPose(Axis.XP.rotationDegrees(-40.0F * swing_rot));
                                     poseStack.translate((double)0.0F, 0.1 * (double)swing_rot, -0.1 * (double)swing_rot);
-                                } else if (stack.getUseAnimation() != UseAnim.BLOCK) {
+                                } else if (stack.getUseAnimation() != ItemUseAnimation.BLOCK) {
                                     poseStack.mulPose(Axis.XP.rotationDegrees(-25.0F * swing));
                                     poseStack.translate((double)0.0F, 0.05 * (double)swing, -0.05 * (double)swing);
                                 }
@@ -1046,7 +1046,7 @@ public abstract class HeldItemsMixin {
                                 p.level().addParticle(ParticleTypes.ITEM_SLIME, p.getX(), p.getY(), p.getZ(), 0.1, 0.1, 0.1);
                             }
 
-                            this.renderItem(p, stack, bl2 ? ItemDisplayContext.FIRST_PERSON_RIGHT_HAND : ItemDisplayContext.FIRST_PERSON_LEFT_HAND, !bl2, poseStack, buffer, light);
+                            this.renderItem(p, stack, bl2 ? ItemDisplayContext.FIRST_PERSON_RIGHT_HAND : ItemDisplayContext.FIRST_PERSON_LEFT_HAND, poseStack, buffer, light);
                         }
                     }
 

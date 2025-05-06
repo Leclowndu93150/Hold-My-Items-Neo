@@ -8,9 +8,7 @@
   ],
   "client": [
     "HeldItemsMixin",
-    "HumanoidArmMixin",
-    "LivingEntityMixin",
-    "PlayerRendererMixin"
+    "LivingEntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1
