@@ -148,7 +148,7 @@ public class HoldMyItemsClientConfig {
             if (itemName.contains("*")) {
                 return true;
             }
-            return ResourceLocation.isValidPath(itemName);
+            return BuiltInRegistries.ITEM.containsKey(ResourceLocation.parse(itemName));
         }
         return false;
     }
