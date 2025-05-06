@@ -141,7 +141,7 @@ public abstract class HeldItemsMixin {
     private void onRenderArmWithItem(AbstractClientPlayer p, float partialTicks, float pitch, InteractionHand hand, float swingProgress, ItemStack stack, float equipProgress, PoseStack poseStack, MultiBufferSource buffer, int light, CallbackInfo ci) {
         boolean isUsingSandpaper = p.getMainHandItem().getItem().toString().contains("sand_paper") && p.isUsingItem() && p.getUsedItemHand() == InteractionHand.MAIN_HAND || p.getOffhandItem().getItem().toString().contains("sand_paper") && p.isUsingItem() && p.getUsedItemHand() == InteractionHand.OFF_HAND;
         if (!isUsingSandpaper) {
-            if ((Boolean) HoldMyItemsClientConfig.ENABLE_PUNCHING.get() || !stack.isEmpty() || p.isSwimming() || p.isVisuallyCrawling() || p.onClimbable()) {
+            if ((Boolean) HoldMyItemsClientConfig.enablePunching || !stack.isEmpty() || p.isSwimming() || p.isVisuallyCrawling() || p.onClimbable()) {
                 Item item = stack.getItem();
 
                 if (HoldMyItemsClientConfig.isItemDisabled(item)) {
@@ -149,7 +149,7 @@ public abstract class HeldItemsMixin {
                 }
 
                 ResourceLocation itemId = ForgeRegistries.ITEMS.getKey(item);
-                List<? extends String> blockedModIds = (List)HoldMyItemsClientConfig.MODS_THAT_HANDLE_THEIR_OWN_RENDERING.get();
+                List<? extends String> blockedModIds = (List)HoldMyItemsClientConfig.modsThatHandleTheirOwnRendering;
                 if (itemId != null) {
                     String namespace = itemId.getNamespace().toLowerCase();
 
@@ -200,8 +200,8 @@ public abstract class HeldItemsMixin {
                     float kj = bl ? 1.0F : -1.0F;
                     poseStack.pushPose();
                     poseStack.pushPose();
-                    poseStack.translate((Double)HoldMyItemsClientConfig.VIEWMODEL_X_OFFSET.get() * (double)kj, (Double)HoldMyItemsClientConfig.VIEWMODEL_Y_OFFSET.get(), (Double)HoldMyItemsClientConfig.VIEWMODEL_Z_OFFSET.get());
-                    double tt = HoldMyItems.deltaTime * (Double)HoldMyItemsClientConfig.ANIMATION_SPEED.get();
+                    poseStack.translate((Double)HoldMyItemsClientConfig.viewmodelXOffset * (double)kj, (Double)HoldMyItemsClientConfig.viewmodelYOffset, (Double)HoldMyItemsClientConfig.viewmodelZOffset);
+                    double tt = HoldMyItems.deltaTime * (Double)HoldMyItemsClientConfig.animationSpeed;
                     float swing_rot = (double)swingProgress < 0.6 ? Mth.sin(Mth.clamp(swingProgress, 0.0F, 0.12506F) * 12.56F) : Mth.sin(Mth.clamp(swingProgress, 0.62532F, 0.75038F) * 12.56F);
                     float swing = Mth.sin(swingProgress * 3.14F);
                     swing = this.easeInOutBack(swing);
@@ -320,7 +320,7 @@ public abstract class HeldItemsMixin {
                         this.climbCount = (float)((double)this.climbCount - 0.1 * tt);
                     }
 
-                    if ((p.isVisuallyCrawling() && (Boolean)HoldMyItemsClientConfig.ENABLE_CLIMB_AND_CRAWL.get() || p.onClimbable() && !p.onGround() && Math.abs(p.getDeltaMovement().y()) > (double)0.0F && (Boolean)HoldMyItemsClientConfig.ENABLE_CLIMB_AND_CRAWL.get()) && !p.isUsingItem() && swingProgress == 0.0F) {
+                    if ((p.isVisuallyCrawling() && (Boolean)HoldMyItemsClientConfig.enableClimbAndCrawl || p.onClimbable() && !p.onGround() && Math.abs(p.getDeltaMovement().y()) > (double)0.0F && (Boolean)HoldMyItemsClientConfig.enableClimbAndCrawl) && !p.isUsingItem() && swingProgress == 0.0F) {
                         this.clCount = (float)((double)this.clCount + 0.1 * tt);
                         if (this.clCount > 1.0F) {
                             this.clCount = 1.0F;
@@ -344,7 +344,7 @@ public abstract class HeldItemsMixin {
                         poseStack.translate(0.0F, 0.0F, p.getXRot() / 80.0F * this.clCount);
                     }
 
-                    if (p.onClimbable() && (Boolean)HoldMyItemsClientConfig.ENABLE_CLIMB_AND_CRAWL.get() && !p.onGround() && !stack.is(Items.LANTERN) && !stack.is(Items.SOUL_LANTERN) && !p.isUsingItem()) {
+                    if (p.onClimbable() && (Boolean)HoldMyItemsClientConfig.enableClimbAndCrawl && !p.onGround() && !stack.is(Items.LANTERN) && !stack.is(Items.SOUL_LANTERN) && !p.isUsingItem()) {
                         poseStack.translate((double)0.0F, 0.1, -0.2);
                     }
 
@@ -404,7 +404,7 @@ public abstract class HeldItemsMixin {
                         }
                     }
 
-                    if (p.isSwimming() && swingProgress == 0.0F && (Boolean)HoldMyItemsClientConfig.ENABLE_SWIMMING_ANIM.get()) {
+                    if (p.isSwimming() && swingProgress == 0.0F && (Boolean)HoldMyItemsClientConfig.enableSwimmingAnim) {
                         double s = (double)(p.tickCount + partialTicks) * 0.1;
                         double swingAmplitude = (double)1.5F;
                         double frequency = (double)2.0F;
@@ -478,7 +478,7 @@ public abstract class HeldItemsMixin {
                     if (stack.isEmpty()) {
                         if (bl && !p.isInvisible()) {
                             float ll = bl ? 1.0F : -1.0F;
-                            if (!(Boolean)HoldMyItemsClientConfig.ENABLE_PUNCHING.get()) {
+                            if (!(Boolean)HoldMyItemsClientConfig.enablePunching) {
                                 return;
                             }
 
@@ -697,7 +697,7 @@ public abstract class HeldItemsMixin {
                                         }
 
                                         poseStack.popPose();
-                                        if ((Boolean)HoldMyItemsClientConfig.MB3D_COMPAT.get()) {
+                                        if ((Boolean)HoldMyItemsClientConfig.mb3dCompat) {
                                             poseStack.mulPose(Axis.YP.rotationDegrees((float)(10 * l)));
                                         }
 
@@ -835,7 +835,7 @@ public abstract class HeldItemsMixin {
                                         poseStack.scale(1.1F, 1.1F, 1.1F);
                                     }
                                 } else {
-                                    float dt = (float)(HoldMyItems.deltaTime * (Double)HoldMyItemsClientConfig.ANIMATION_SPEED.get());
+                                    float dt = (float)(HoldMyItems.deltaTime * (Double)HoldMyItemsClientConfig.animationSpeed);
                                     float yawDelta = p.yHeadRotO - p.yHeadRot;
                                     float pitchDelta = p.xRotO - p.getXRot();
                                     this.swingVelocityY += yawDelta * 0.015F * dt;
@@ -869,7 +869,7 @@ public abstract class HeldItemsMixin {
                                     poseStack.scale(1.5F, 1.5F, 1.5F);
                                 }
                             } else {
-                                if ((!stack.is(HoldMyItemsTags.TOOLS) || stack.is(ItemTags.TRIMMABLE_ARMOR) || stack.is(ItemTags.BOOKSHELF_BOOKS) || stack.getUseAnimation() == UseAnim.EAT || !stack.isEnchantable()) && stack.getUseAnimation() != UseAnim.BOW && stack.getUseAnimation() != UseAnim.SPYGLASS && this.getAttackDamage(stack) == 0.0F && stack.getUseAnimation() != UseAnim.BLOCK && !stack.is(Items.WARPED_FUNGUS_ON_A_STICK) && !stack.is(Items.CARROT_ON_A_STICK) && !(stack.getItem() instanceof FishingRodItem) && !stack.is(Items.SHEARS) && !stack.is(ItemTags.HOES) && !(Boolean)HoldMyItemsClientConfig.MB3D_COMPAT.get()) {
+                                if ((!stack.is(HoldMyItemsTags.TOOLS) || stack.is(ItemTags.TRIMMABLE_ARMOR) || stack.is(ItemTags.BOOKSHELF_BOOKS) || stack.getUseAnimation() == UseAnim.EAT || !stack.isEnchantable()) && stack.getUseAnimation() != UseAnim.BOW && stack.getUseAnimation() != UseAnim.SPYGLASS && this.getAttackDamage(stack) == 0.0F && stack.getUseAnimation() != UseAnim.BLOCK && !stack.is(Items.WARPED_FUNGUS_ON_A_STICK) && !stack.is(Items.CARROT_ON_A_STICK) && !(stack.getItem() instanceof FishingRodItem) && !stack.is(Items.SHEARS) && !stack.is(ItemTags.HOES) && !(Boolean)HoldMyItemsClientConfig.mb3dCompat) {
                                     if (stack.getUseAnimation() == UseAnim.BRUSH) {
                                         poseStack.mulPose(Axis.XN.rotationDegrees(25.0F));
                                         poseStack.translate(bl ? (double)0.0F : 0.35, bl ? (double)0.0F : (double)0.25F, bl ? (double)0.0F : 0.37);
@@ -889,9 +889,9 @@ public abstract class HeldItemsMixin {
                                     }
 
                                     if (stack.is(Items.FEATHER) || stack.is(Items.SLIME_BALL) || stack.is(Items.PUFFERFISH)) {
-                                        this.vertVelocityYSlime = (float)((double)this.vertVelocityYSlime + (double)swingProgress * 0.03 * HoldMyItems.deltaTime * (Double)HoldMyItemsClientConfig.ANIMATION_SPEED.get());
+                                        this.vertVelocityYSlime = (float)((double)this.vertVelocityYSlime + (double)swingProgress * 0.03 * HoldMyItems.deltaTime * (Double)HoldMyItemsClientConfig.animationSpeed);
                                         if ((p.getDeltaMovement().length() > 0.09 && p.onGround() || p.isSwimming() || p.isVisuallyCrawling() || p.onClimbable() && !p.onGround()) && (Boolean)Minecraft.getInstance().options.bobView().get()) {
-                                            this.vertVelocityYSlime += (float)(-0.05 * p.getDeltaMovement().length() * HoldMyItems.deltaTime * (Double)HoldMyItemsClientConfig.ANIMATION_SPEED.get());
+                                            this.vertVelocityYSlime += (float)(-0.05 * p.getDeltaMovement().length() * HoldMyItems.deltaTime * (Double)HoldMyItemsClientConfig.animationSpeed);
                                         }
 
                                         poseStack.scale(1.0F, 1.0F + this.vertAngleYSlime * -2.0F, 1.0F);
@@ -946,9 +946,9 @@ public abstract class HeldItemsMixin {
                                     }
 
                                     if (stack.is(Items.SLIME_BLOCK) || stack.is(Items.HONEY_BLOCK) || Block.byItem(stack.getItem()).defaultBlockState().is(BlockTags.FLOWERS) || Block.byItem(stack.getItem()).defaultBlockState().is(BlockTags.LEAVES) || Block.byItem(stack.getItem()).defaultBlockState().is(BlockTags.SAPLINGS) || Block.byItem(stack.getItem()).defaultBlockState().is(BlockTags.SWORD_EFFICIENT)) {
-                                        this.vertVelocityYSlime = (float)((double)this.vertVelocityYSlime + (double)swingProgress * 0.03 * HoldMyItems.deltaTime * (Double)HoldMyItemsClientConfig.ANIMATION_SPEED.get());
+                                        this.vertVelocityYSlime = (float)((double)this.vertVelocityYSlime + (double)swingProgress * 0.03 * HoldMyItems.deltaTime * (Double)HoldMyItemsClientConfig.animationSpeed);
                                         if ((p.getDeltaMovement().length() > 0.09 && p.onGround() || p.isSwimming() || p.isVisuallyCrawling() || p.onClimbable() && !p.onGround()) && (Boolean)Minecraft.getInstance().options.bobView().get()) {
-                                            this.vertVelocityYSlime += (float)(-0.05 * p.getDeltaMovement().length() * HoldMyItems.deltaTime * (Double)HoldMyItemsClientConfig.ANIMATION_SPEED.get());
+                                            this.vertVelocityYSlime += (float)(-0.05 * p.getDeltaMovement().length() * HoldMyItems.deltaTime * (Double)HoldMyItemsClientConfig.animationSpeed);
                                         }
 
                                         poseStack.scale(1.0F, 1.0F + this.vertAngleYSlime * -2.0F, 1.0F);
@@ -1008,7 +1008,7 @@ public abstract class HeldItemsMixin {
                                 }
                             }
 
-                            if (stack.is(Items.NETHER_STAR) || stack.is(Items.END_CRYSTAL) && (Boolean)HoldMyItemsClientConfig.MB3D_COMPAT.get()) {
+                            if (stack.is(Items.NETHER_STAR) || stack.is(Items.END_CRYSTAL) && (Boolean)HoldMyItemsClientConfig.mb3dCompat) {
                                 this.netherCounter = (float)((double)this.netherCounter + 0.9 * tt);
                                 poseStack.translate((double)0.0F, (double)0.25F + 0.02 * (double)Mth.sin(this.netherCounter * 0.1F), (double)0.0F);
                                 poseStack.mulPose(Axis.XP.rotationDegrees(3.0F * Mth.sin(this.netherCounter * 0.2F)));
@@ -1017,15 +1017,15 @@ public abstract class HeldItemsMixin {
                                 this.netherCounter = 0.0F;
                             }
 
-                            if ((Boolean)HoldMyItemsClientConfig.MB3D_COMPAT.get()) {
+                            if ((Boolean)HoldMyItemsClientConfig.mb3dCompat) {
                                 if (stack.is(ItemTags.SWORDS)) {
                                     poseStack.translate((double)0.0F, 0.2, (double)0.0F);
                                 }
 
                                 if (stack.is(Items.FEATHER) || stack.is(Items.SLIME_BALL) || stack.is(Items.PUFFERFISH)) {
-                                    this.vertVelocityYSlime = (float)((double)this.vertVelocityYSlime + (double)swingProgress * 0.03 * HoldMyItems.deltaTime * (Double)HoldMyItemsClientConfig.ANIMATION_SPEED.get());
+                                    this.vertVelocityYSlime = (float)((double)this.vertVelocityYSlime + (double)swingProgress * 0.03 * HoldMyItems.deltaTime * (Double)HoldMyItemsClientConfig.animationSpeed);
                                     if ((p.getDeltaMovement().length() > 0.09 && p.onGround() || p.isSwimming() || p.isVisuallyCrawling() || p.onClimbable() && !p.onGround()) && (Boolean)Minecraft.getInstance().options.bobView().get()) {
-                                        this.vertVelocityYSlime += (float)(-0.05 * p.getDeltaMovement().length() * HoldMyItems.deltaTime * (Double)HoldMyItemsClientConfig.ANIMATION_SPEED.get());
+                                        this.vertVelocityYSlime += (float)(-0.05 * p.getDeltaMovement().length() * HoldMyItems.deltaTime * (Double)HoldMyItemsClientConfig.animationSpeed);
                                     }
 
                                     poseStack.scale(1.0F, 1.0F + this.vertAngleYSlime * -2.0F, 1.0F);

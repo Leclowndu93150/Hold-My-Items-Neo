@@ -26,6 +26,6 @@ public class LivingEntityMixin {
         LivingEntity self = (LivingEntity)(Object)this;
         LocalPlayer player = Minecraft.getInstance().player;
 
-        return player != null && player == self ? HoldMyItemsClientConfig.SWING_SPEED.get() : original;
+        return player != null && player == self ? HoldMyItemsClientConfig.swingSpeed : original;
     }
 }
