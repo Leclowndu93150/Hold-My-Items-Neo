@@ -9,6 +9,7 @@
   "client": [
     "HeldItemsMixin",
     "HumanoidArmMixin",
+    "ItemInHandLayerMixin",
     "LivingEntityMixin",
     "PlayerRendererMixin"
   ],

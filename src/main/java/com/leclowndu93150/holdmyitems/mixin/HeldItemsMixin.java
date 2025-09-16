@@ -5,6 +5,8 @@ import com.leclowndu93150.holdmyitems.HoldMyItems;
 import com.leclowndu93150.holdmyitems.config.HoldMyItemsClientConfig;
 import com.leclowndu93150.holdmyitems.tags.HoldMyItemsTags;
 import com.leclowndu93150.holdmyitems.utils.UseAnimMappings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import java.util.List;
@@ -42,6 +44,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin({ItemInHandRenderer.class})
 public abstract class HeldItemsMixin {
+    private static final Logger LOGGER = LoggerFactory.getLogger("HoldMyItems-BowDebug");
     private boolean repPower = false;
     private float prevAge = 0.0F;
     private double previousRotation = (double)0.0F;
@@ -139,6 +142,14 @@ public abstract class HeldItemsMixin {
             cancellable = true
     )
     private void onRenderArmWithItem(AbstractClientPlayer p, float partialTicks, float pitch, InteractionHand hand, float swingProgress, ItemStack stack, float equipProgress, PoseStack poseStack, MultiBufferSource buffer, int light, CallbackInfo ci) {
+        if (hand == InteractionHand.OFF_HAND && p.isUsingItem()) {
+            ItemStack usedItem = p.getUseItem();
+            if (usedItem.getUseAnimation() == UseAnim.BOW) {
+                ci.cancel();
+                return;
+            }
+        }
+        
         boolean isUsingSandpaper = p.getMainHandItem().getItem().toString().contains("sand_paper") && p.isUsingItem() && p.getUsedItemHand() == InteractionHand.MAIN_HAND || p.getOffhandItem().getItem().toString().contains("sand_paper") && p.isUsingItem() && p.getUsedItemHand() == InteractionHand.OFF_HAND;
         if (!isUsingSandpaper) {
             if ((Boolean) HoldMyItemsClientConfig.enablePunching || !stack.isEmpty() || p.isSwimming() || p.isVisuallyCrawling() || p.onClimbable()) {
@@ -590,6 +601,7 @@ public abstract class HeldItemsMixin {
                         label1483: {
                             boolean bl2 = arm == HumanoidArm.RIGHT;
                             int l = bl2 ? 1 : -1;
+                            
                             if (p.isUsingItem() && p.getUseItemRemainingTicks() > 0 && p.getUsedItemHand() == hand) {
                                 switch (UseAnimMappings.ENUM_SWITCH_MAP[stack.getUseAnimation().ordinal()]) {
                                     case 1:
@@ -788,22 +800,67 @@ public abstract class HeldItemsMixin {
                                 poseStack.translate((double)(0.65F * (float)l), (double)-1.0F, -0.6);
                             } else {
                                 this.riptideCounter = 0.0F;
-                                if (!stack.is(Items.LANTERN) && !stack.is(Items.SOUL_LANTERN) && !stack.is(ItemTags.HANGING_SIGNS)) {
+                                
+                                // Special handling for bow-like items (including modded bows)
+                                if (stack.getUseAnimation() == UseAnim.BOW && p.isUsingItem() && p.getUsedItemHand() == hand) {
+                                    poseStack.pushPose();
+                                    if (p.getMainArm() == HumanoidArm.LEFT) {
+                                        bl = !bl;
+                                    }
+
+                                    float drawProgress = 0.0F;
+                                    if (stack.getUseDuration() > 0) {
+                                        int useTime = stack.getUseDuration() - p.getUseItemRemainingTicks();
+                                        drawProgress = Math.min((float)useTime / 20.0F, 1.0F);
+                                    }
+                                    
+                                    poseStack.translate(bl ? -0.1 : 0.1, (double)0.0F, (double)drawProgress * 0.15);
+                                    this.renderPlayerArm(poseStack, buffer, light, equipProgress, swingProgress, arm);
+                                    poseStack.popPose();
+                                    
+                                    poseStack.translate(bl ? (double)-0.5F : (double)0.5F, -0.45, 0.1);
+                                    poseStack.mulPose(Axis.XP.rotation(0.3F));
+                                    if (bl) {
+                                        poseStack.mulPose(Axis.ZN.rotation(-0.3F));
+                                        poseStack.mulPose(Axis.YN.rotation(1.0F));
+                                    } else {
+                                        poseStack.mulPose(Axis.ZP.rotation(-0.3F));
+                                        poseStack.mulPose(Axis.YP.rotation(1.0F));
+                                    }
+                                    
+                                    this.renderPlayerArm(poseStack, buffer, light, equipProgress, swingProgress, arm.getOpposite());
+                                    
+                                    if (bl) {
+                                        poseStack.mulPose(Axis.YN.rotation(2.5F));
+                                    } else {
+                                        poseStack.mulPose(Axis.YP.rotation(2.5F));
+                                    }
+                                    
+                                    poseStack.translate(bl ? -0.65 : 0.65, -0.35, 0.27);
+                                } else if (!stack.is(Items.LANTERN) && !stack.is(Items.SOUL_LANTERN) && !stack.is(ItemTags.HANGING_SIGNS)) {
                                     if (stack.getUseAnimation() == UseAnim.BLOCK) {
                                         poseStack.translate((double)0.0F, -0.2, (double)0.0F);
                                     }
+                                    
+                                    poseStack.translate((double)l, (double)0.0F - (double)equipProgress * 0.3, 0.3);
+                                    poseStack.mulPose(Axis.YP.rotationDegrees((float)(45 * l)));
+                                    poseStack.mulPose(Axis.ZP.rotationDegrees((float)(-40 * l)));
+                                    poseStack.mulPose(Axis.XP.rotationDegrees(30.0F));
+                                    this.altSwing(poseStack, arm, swingProgress);
+                                    poseStack.scale(0.9F, 0.9F, 0.9F);
+                                    this.renderPlayerArm(poseStack, buffer, light, 0.0F, 0.0F, arm);
                                 } else {
                                     poseStack.translate(0.1 * (double)l, (double)0.0F, -0.1);
                                     poseStack.mulPose(Axis.XP.rotationDegrees(10.0F));
+                                    
+                                    poseStack.translate((double)l, (double)0.0F - (double)equipProgress * 0.3, 0.3);
+                                    poseStack.mulPose(Axis.YP.rotationDegrees((float)(45 * l)));
+                                    poseStack.mulPose(Axis.ZP.rotationDegrees((float)(-40 * l)));
+                                    poseStack.mulPose(Axis.XP.rotationDegrees(30.0F));
+                                    this.altSwing(poseStack, arm, swingProgress);
+                                    poseStack.scale(0.9F, 0.9F, 0.9F);
+                                    this.renderPlayerArm(poseStack, buffer, light, 0.0F, 0.0F, arm);
                                 }
-
-                                poseStack.translate((double)l, (double)0.0F - (double)equipProgress * 0.3, 0.3);
-                                poseStack.mulPose(Axis.YP.rotationDegrees((float)(45 * l)));
-                                poseStack.mulPose(Axis.ZP.rotationDegrees((float)(-40 * l)));
-                                poseStack.mulPose(Axis.XP.rotationDegrees(30.0F));
-                                this.altSwing(poseStack, arm, swingProgress);
-                                poseStack.scale(0.9F, 0.9F, 0.9F);
-                                this.renderPlayerArm(poseStack, buffer, light, 0.0F, 0.0F, arm);
                             }
 
                             poseStack.translate(-0.3 * (double)l, 0.65, -0.1);
