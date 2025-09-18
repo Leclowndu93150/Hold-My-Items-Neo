@@ -1,5 +1,6 @@
 package com.leclowndu93150.holdmyitems.mixin;
 
+import com.leclowndu93150.holdmyitems.config.HoldMyItemsClientConfig;
 import com.leclowndu93150.holdmyitems.tags.HoldMyItemsTags;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
@@ -41,7 +42,7 @@ public abstract class PlayerRendererMixin extends LivingEntityRenderer<AbstractC
         ItemStack stack = player.getMainHandItem();
         Item item = stack.getItem();
         if (item instanceof BlockItem blockItem) {
-            if (stack.is(HoldMyItemsTags.LANTERNS)) {
+            if (stack.is(HoldMyItemsTags.LANTERNS) && !HoldMyItemsClientConfig.isThirdPersonBlacklisted(item)) {
                 float swingMultiplier = player.onGround() ? 1.0F : 0.2F;
                 poseStack.pushPose();
                 float bodyYaw = Mth.lerp(f1, player.yBodyRotO, player.yBodyRot);

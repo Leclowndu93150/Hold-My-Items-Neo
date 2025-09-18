@@ -1,5 +1,6 @@
 package com.leclowndu93150.holdmyitems.mixin;
 
+import com.leclowndu93150.holdmyitems.config.HoldMyItemsClientConfig;
 import com.leclowndu93150.holdmyitems.tags.HoldMyItemsTags;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.model.ArmedModel;
@@ -24,7 +25,7 @@ public class ItemInHandLayerMixin<T extends LivingEntity, M extends EntityModel<
         cancellable = true
     )
     private void cancelLanternItemRendering(LivingEntity livingEntity, ItemStack itemStack, ItemDisplayContext displayContext, HumanoidArm arm, PoseStack poseStack, MultiBufferSource buffer, int packedLight, CallbackInfo ci) {
-        if (itemStack.is(HoldMyItemsTags.LANTERNS) && arm == HumanoidArm.RIGHT) {
+        if (itemStack.is(HoldMyItemsTags.LANTERNS) && arm == HumanoidArm.RIGHT && !HoldMyItemsClientConfig.isThirdPersonBlacklisted(itemStack.getItem())) {
             ci.cancel();
         }
     }

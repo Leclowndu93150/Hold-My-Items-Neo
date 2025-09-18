@@ -74,6 +74,12 @@ public final class HoldMyItemsClientConfig {
                     List.of(),
                     HoldMyItemsClientConfig::validateItemName);
 
+    private static final ForgeConfigSpec.ConfigValue<List<? extends String>> THIRD_PERSON_BLACKLIST_STRINGS = BUILDER
+            .comment("List of items to disable custom 3rd person rendering for. Can use patterns with * as wildcard.")
+            .defineListAllowEmpty("thirdPersonBlacklist",
+                    List.of(),
+                    HoldMyItemsClientConfig::validateItemName);
+
     public static final ForgeConfigSpec CLIENT_CONFIG = BUILDER.pop().build();
 
     // Runtime values loaded from config
@@ -88,11 +94,17 @@ public final class HoldMyItemsClientConfig {
     public static boolean mb3dCompat;
     public static List<String> modsThatHandleTheirOwnRendering;
     public static List<String> disabledItemsStrings;
+    public static List<String> thirdPersonBlacklistStrings;
 
     // Cache for disabled items
     private static final Set<Item> disabledItemCache = new HashSet<>();
     private static final List<Pattern> disabledItemPatterns = new ArrayList<>();
     private static boolean initialized = false;
+    
+    // Cache for third person blacklisted items
+    private static final Set<Item> thirdPersonBlacklistCache = new HashSet<>();
+    private static final List<Pattern> thirdPersonBlacklistPatterns = new ArrayList<>();
+    private static boolean thirdPersonInitialized = false;
 
     private static void initPatterns() {
         if (initialized) return;
@@ -149,6 +161,61 @@ public final class HoldMyItemsClientConfig {
         return false;
     }
 
+    private static void initThirdPersonPatterns() {
+        if (thirdPersonInitialized) return;
+        thirdPersonInitialized = true;
+        thirdPersonBlacklistCache.clear();
+        thirdPersonBlacklistPatterns.clear();
+
+        for (String itemName : thirdPersonBlacklistStrings) {
+            if (itemName.contains("*")) {
+                try {
+                    String regex = itemName.replace(".", "\\.").replace("*", ".*");
+                    thirdPersonBlacklistPatterns.add(Pattern.compile(regex));
+                } catch (Exception e) {
+                    HoldMyItems.LOGGER.error("Invalid regex pattern in third person blacklist config: {}", itemName, e);
+                }
+            } else {
+                ResourceLocation itemId = ResourceLocation.tryParse(itemName);
+                if (itemId != null) {
+                    Item item = BuiltInRegistries.ITEM.get(itemId);
+                    if (item != null) {
+                        thirdPersonBlacklistCache.add(item);
+                    } else {
+                        try {
+                            thirdPersonBlacklistPatterns.add(Pattern.compile(Pattern.quote(itemName)));
+                        } catch (Exception e) {
+                            HoldMyItems.LOGGER.error("Failed to create pattern for specific item in third person blacklist: {}", itemName, e);
+                        }
+                    }
+                } else {
+                    HoldMyItems.LOGGER.warn("Invalid ResourceLocation format in third person blacklist config: {}", itemName);
+                }
+            }
+        }
+    }
+
+    public static boolean isThirdPersonBlacklisted(Item item) {
+        if (item == null) return false;
+        initThirdPersonPatterns();
+
+        if (thirdPersonBlacklistCache.contains(item)) {
+            return true;
+        }
+
+        ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(item);
+        if (itemId != null) {
+            String idString = itemId.toString();
+            for (Pattern pattern : thirdPersonBlacklistPatterns) {
+                if (pattern.matcher(idString).matches()) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     @SubscribeEvent
     public static void onLoad(final ModConfigEvent event) {
         if (event.getConfig().getSpec() == CLIENT_CONFIG) {
@@ -163,9 +230,11 @@ public final class HoldMyItemsClientConfig {
             mb3dCompat = MB3D_COMPAT.get();
             modsThatHandleTheirOwnRendering = new ArrayList<>(MODS_THAT_HANDLE_THEIR_OWN_RENDERING.get());
             disabledItemsStrings = new ArrayList<>(DISABLED_ITEMS_STRINGS.get());
+            thirdPersonBlacklistStrings = new ArrayList<>(THIRD_PERSON_BLACKLIST_STRINGS.get());
 
             // Reset the patterns so they'll be reinitialized next time isItemDisabled is called
             initialized = false;
+            thirdPersonInitialized = false;
         }
     }
 
